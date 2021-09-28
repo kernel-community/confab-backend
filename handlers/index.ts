@@ -89,7 +89,7 @@ const getEventDetailsForGcal = (event: Event, eventNumber: number, totalEvents: 
 };
 
 const prepareEventURL = (hash: string | false): string => {
-  return "https://juntos.kernel.community/rsvp/" + hash;
+  return "https://convo.kernel.community/rsvp/" + hash;
 };
 
 const prepareSlackMessage = async (
