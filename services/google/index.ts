@@ -59,6 +59,10 @@ class GoogleService {
           start: event.start,
           end: event.end,
           attendees,
+          guestsCanInviteOthers: event.guestsCanInviteOthers,
+          guestsCanSeeOtherGuests: event.guestsCanSeeOtherGuests,
+          location: event.location,
+          description: event.description
         },
         sendUpdates: "all",
       });
