@@ -211,6 +211,11 @@ export const newEventHandler = async (
         );
       }
     }
+
+    req.intermediatePayload = {
+      id: created.id,
+      hash: created.hash
+    }
   }
   next();
 };

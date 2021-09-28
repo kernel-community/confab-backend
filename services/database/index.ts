@@ -4,7 +4,7 @@ import { EventType, Event as EventSchema } from ".prisma/client";
 class Database {
   public prisma = prisma;
   public disconnect = () => prisma.$disconnect();
-  public createEvent = async (e): Promise<{ id: number }> => {
+  public createEvent = async (e): Promise<{ id: number, hash: string }> => {
     const r = await prisma.event.create({
       data: {
         title: e.title,
@@ -33,6 +33,7 @@ class Database {
       },
       select: {
         id: true,
+        hash: true
       },
     });
     return r;
