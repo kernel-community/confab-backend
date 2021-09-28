@@ -59,7 +59,7 @@ export type GoogleEvent = {
 
 export type GoogleDate = {
   dateTime: string
-  timezone: string
+  timezone?: string
 };
 
 export type GoogleAttendee = {

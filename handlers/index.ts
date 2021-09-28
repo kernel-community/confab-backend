@@ -44,11 +44,20 @@ export const pingErrorHandler = (
   next(errorBuilder("error message", 500, "raw log data goes here"));
 };
 
-const getEventDetailsToStore = (event: Event, hash: string | false): Event => {
-  let e: Event = {
-    ...event,
+const getEventDetailsToStore = (event: Event, hash: string | false) => {
+  let e = {
     hash: hash == false ? nanoid(10) : hash,
     series: hash == false ? false : true,
+    title: event.title,
+    descriptionText: event.descriptionText,
+    descriptionHtml: event.descriptionHtml,
+    startDateTime: event.startDateTime,
+    endDateTime: event.endDateTime,
+    location: event.location,
+    limit: event.limit,
+    typeId: event.typeId,
+    proposerEmail: event.proposerEmail,
+    proposerName: event.proposerName
   };
   return e;
 };
@@ -63,17 +72,19 @@ const getEventDetailsForGcal = (event: Event, eventNumber: number, totalEvents: 
     summary: event.title + `${totalEvents > 1 ? (` (${eventNumber} of ${totalEvents})`): ''}`,
     attendees: [organizer],
     start: {
-      dateTime: new Date(event.startDateTime).toISOString(),
-      timezone: event.timezone,
+      dateTime: event.startDateTime
     },
     end: {
-      dateTime: new Date(event.endDateTime).toISOString(),
-      timezone: event.timezone,
+      dateTime: event.endDateTime
     },
     guestsCanSeeOtherGuests: true,
     guestsCanInviteOthers: true, // @note default = true; if required, can make this a param
     location: event.location,
-    description: event.descriptionText
+    description: event.descriptionText + `${
+      event.proposerName?
+        `\n\n${'Proposer: ' + event.proposerName}`: 
+        ``
+      }`
   };
 };
 
@@ -82,7 +93,7 @@ const prepareEventURL = (hash: string | false): string => {
 };
 
 const prepareSlackMessage = async (
-  event: Event
+  event
 ): Promise<SlackEventMessage> => {
   const proposer = await db.getUser(event.proposerEmail);
   const type = await db.getType(event.typeId!);

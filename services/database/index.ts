@@ -4,16 +4,14 @@ import { EventType, Event as EventSchema } from ".prisma/client";
 class Database {
   public prisma = prisma;
   public disconnect = () => prisma.$disconnect();
-  public createEvent = async (e: Event): Promise<{ id: number }> => {
+  public createEvent = async (e): Promise<{ id: number }> => {
     const r = await prisma.event.create({
       data: {
         title: e.title,
         descriptionHtml: e.descriptionHtml,
         descriptionText: e.descriptionText,
         startDateTime: e.startDateTime,
-        offset: e.offset,
         endDateTime: e.endDateTime,
-        timezone: e.timezone,
         location: e.location,
         hash: e.hash!,
         series: e.series,

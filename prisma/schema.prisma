@@ -15,10 +15,8 @@ model Event {
   title           String
   descriptionText String?
   descriptionHtml String?
-  startDateTime   DateTime
-  endDateTime     DateTime
-  offset          Int
-  timezone        String
+  startDateTime   String
+  endDateTime     String
   location        String
   hash            String
   series          Boolean
@@ -49,12 +47,12 @@ model TagsOnPosts {
 }
 
 model User {
-  email         String   @unique
+  email         String      @unique
   username      String?
   firstName     String?
   lastName      String?
   block         Int?
-  sendReminders Boolean? @default(false)
+  sendReminders Boolean?    @default(false)
   Event         Event[]
 }
 
