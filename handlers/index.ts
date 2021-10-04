@@ -55,7 +55,7 @@ const getEventDetailsToStore = (event: Event, hash: string | false) => {
     endDateTime: event.endDateTime,
     location: event.location,
     limit: event.limit,
-    typeId: event.typeId,
+    typeId: Number(event.typeId),
     proposerEmail: event.proposerEmail,
     proposerName: event.proposerName
   };
