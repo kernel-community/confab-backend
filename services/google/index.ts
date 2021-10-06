@@ -1,6 +1,6 @@
-import { getAuth } from "./auth";
-import { google } from "googleapis";
-import { GoogleEvent } from "interfaces";
+import {getAuth} from './auth';
+import {google} from 'googleapis';
+import {GoogleEvent} from 'types';
 
 class GoogleService {
   getCalendar = async () => {
@@ -8,14 +8,14 @@ class GoogleService {
     try {
       auth = await getAuth();
     } catch (e) {
-      console.log("error in auth", e);
+      console.log('error in auth', e);
     }
-    const calendar = google.calendar({ version: "v3", auth });
+    const calendar = google.calendar({version: 'v3', auth});
     return calendar;
   };
   public createEvent = async (
-    event: GoogleEvent,
-    calendarId: string
+      event: GoogleEvent,
+      calendarId: string,
   ): Promise<string> => {
     const calendar = await this.getCalendar();
     const e = await calendar.events.insert({
@@ -23,7 +23,7 @@ class GoogleService {
       requestBody: event,
     });
     if (!e.data.id) {
-      throw new Error("Error in creating event");
+      throw new Error('Error in creating event');
     }
     return e.data.id!;
   };
@@ -37,18 +37,18 @@ class GoogleService {
     ).data;
   };
   public rsvp = async (
-    eventId: string,
-    calendarId: string,
-    email: string
+      eventId: string,
+      calendarId: string,
+      email: string,
   ): Promise<void> => {
     const calendar = await this.getCalendar();
     const event = await this.getEvent(calendarId, eventId);
-    let attendees = event.attendees ? event.attendees : [];
-    let alreadyRsvpd:boolean = attendees.find(attendee => attendee.email == email)? true : false;
+    const attendees = event.attendees ? event.attendees : [];
+    const alreadyRsvpd:boolean = attendees.find((attendee) => attendee.email == email)? true : false;
     if (!alreadyRsvpd) {
       attendees.push({
         email,
-        responseStatus: "accepted",
+        responseStatus: 'accepted',
       });
       await calendar.events.update({
         calendarId,
@@ -62,9 +62,9 @@ class GoogleService {
           guestsCanInviteOthers: event.guestsCanInviteOthers,
           guestsCanSeeOtherGuests: event.guestsCanSeeOtherGuests,
           location: event.location,
-          description: event.description
+          description: event.description,
         },
-        sendUpdates: "all",
+        sendUpdates: 'all',
       });
     }
   };

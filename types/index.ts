@@ -1,6 +1,6 @@
-import { Request } from "express";
+import {Request} from 'express';
 // import {Event} from "@prisma/client";
-import { Event as EventModel } from ".prisma/client";
+import {Event as EventModel} from '.prisma/client';
 export interface Error {
   message?: string;
   status?: number;
@@ -65,7 +65,7 @@ export type GoogleDate = {
 export type GoogleAttendee = {
   email: string
   organizer?: boolean
-  responseStatus?: "accepted" | "tentative" | "needsAction" | "declined"
+  responseStatus?: 'accepted' | 'tentative' | 'needsAction' | 'declined'
 };
 
 export type Attendee = {

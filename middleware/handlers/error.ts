@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction as Next } from "express";
-import { Error } from "../interfaces";
-import { errorBuilder } from "./utils";
+import {Request, Response, NextFunction as Next} from 'express';
+import {Error} from '../../types';
+import {errorBuilder} from '../utils';
 
 const errorNotFound = (req: Request, res: Response, next: Next) => {
-  next(errorBuilder("Not Found", 404));
+  next(errorBuilder('Not Found', 404));
 };
 
 const errorHandler = (logger) => {
@@ -12,7 +12,7 @@ const errorHandler = (logger) => {
     res.status(error.status ? error.status : 500);
     res.json({
       ok: false,
-      message: error.message ? error.message : "",
+      message: error.message ? error.message : '',
     });
   };
 };
