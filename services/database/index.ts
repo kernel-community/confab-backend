@@ -68,13 +68,20 @@ class Database {
       },
     });
   };
-  public getUser = async (email: string) => {
+  public getUserName = async (email: string) => {
     const name = await prisma.user.findUnique({
       where: {email},
       select: {firstName: true},
     });
     return name?.firstName;
   };
+  public getUser = (email: string) => prisma.user.findUnique({
+    where: {email},
+  });
+  public updateUser = (email, data) => prisma.user.update({
+    where: {email},
+    data,
+  })
   public getType = async (id: number) => {
     const t = await prisma.eventType.findUnique({
       where: {id},

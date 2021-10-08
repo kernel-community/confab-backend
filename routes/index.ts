@@ -7,6 +7,8 @@ import {
   rsvpHandler,
   eventTypesHandler,
   fetchEventHandler,
+  fetchUserHandler,
+  updateUserHandler,
 } from '../middleware';
 
 const router = Router();
@@ -27,6 +29,12 @@ export default (client) => {
 
   // get event by id
   router.get('/event/:hash', fetchEventHandler, responseHandler);
+
+  // get user details
+  router.get('/user/:email', fetchUserHandler, responseHandler);
+
+  // update user details
+  router.post('/user', updateUserHandler, responseHandler);
 
   return router;
 };

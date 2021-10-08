@@ -1,3 +1,4 @@
+/* eslint-disable no-invalid-this */
 import {getAuth} from './auth';
 import {google} from 'googleapis';
 import {GoogleEvent} from 'types';

@@ -68,7 +68,7 @@ const prepareEventURL = (hash: string | false): string => {
 export const prepareSlackMessage = async (
     event,
 ): Promise<SlackEventMessage> => {
-  const proposer = await db.getUser(event.proposerEmail);
+  const proposer = await db.getUserName(event.proposerEmail);
   const type = await db.getType(Number(event.typeId!));
   const title = event.title.replace(/[&\/\\#,+$~%.'":*?<>@^{}]/g, '');
   let description = event.descriptionText!
