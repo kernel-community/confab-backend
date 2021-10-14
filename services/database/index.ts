@@ -78,9 +78,13 @@ class Database {
   public getUser = (email: string) => prisma.user.findUnique({
     where: {email},
   });
-  public updateUser = (email, data) => prisma.user.update({
+  public updateUser = (email, data) => prisma.user.upsert({
     where: {email},
-    data,
+    update: data,
+    create: {
+      email,
+      ...data,
+    },
   })
   public getType = async (id: number) => {
     const t = await prisma.eventType.findUnique({

@@ -14,11 +14,6 @@ export default async function(
     username: data.username || '',
     firstName: data.name || '',
   };
-  const notFound = (await db.getUser(email)) === null;
-  if (notFound) {
-    req.intermediatePayload = '';
-  } else {
-    req.intermediatePayload = await db.updateUser(email, payload);
-  }
+  req.intermediatePayload = await db.updateUser(email, payload);
   next();
 }
