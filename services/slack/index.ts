@@ -1,3 +1,4 @@
+/* eslint-disable no-invalid-this */
 import {WebClient} from '@slack/web-api';
 import {SlackEventMessage} from 'types';
 import * as Config from '../../config/index.json';

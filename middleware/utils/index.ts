@@ -70,9 +70,10 @@ export const prepareSlackMessage = async (
 ): Promise<SlackEventMessage> => {
   const proposer = await db.getUserName(event.proposerEmail);
   const type = await db.getType(Number(event.typeId!));
-  const title = event.title.replace(/[&\/\\#,+$~%.'":*?<>@^{}]/g, '');
+  const title = event.title
+      .replace(/[&\/\\#+$~%'":*?<>@^{}]/g, '');
   let description = event.descriptionText!
-      .replace(/[&\/\\#,+()$~%.'":*?<>@^{}]/g, '')
+      .replace(/[&\/\\#+$~%'":*?<>@^{}]/g, '')
       .substring(0, 200);
   if (description.length > 200) description += '...';
 
