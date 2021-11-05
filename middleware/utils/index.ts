@@ -26,7 +26,7 @@ export const getEventDetailsToStore = (event: Event, hash: string | false) => {
     startDateTime: event.startDateTime,
     endDateTime: event.endDateTime,
     location: event.location,
-    limit: event.limit,
+    limit: Number(event.limit),
     typeId: Number(event.typeId),
     proposerEmail: event.proposerEmail,
     proposerName: event.proposerName,
