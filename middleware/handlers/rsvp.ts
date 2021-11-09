@@ -5,7 +5,7 @@ import {errorBuilder} from '../utils';
 import db from '../../services/database';
 import google from '../../services/google';
 
-export default async function resrsvpHandler(
+export default async function rsvpHandler(
     req: RequestWithPayload,
     res: Response,
     next: Next,
