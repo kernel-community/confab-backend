@@ -57,6 +57,8 @@ export const getEventDetailsForGcal = async (event: Event, eventNumber: number, 
       event.proposerName?
         `\n\n${'Proposer: ' + event.proposerName}`:
         ``
+    }` + `${
+      `\nRSVP here: https://convo.kernel.community/rsvp/` + event.hash
     }`,
   };
 };
@@ -82,7 +84,7 @@ export const prepareSlackMessage = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: proposer + ' has proposed a new ' + type?.type + '!',
+      text: '*' + proposer + '*' + ' has proposed a new ' + type?.type + '!',
     },
   });
   blocks.push({
