@@ -38,7 +38,7 @@ export default async function newEventHandler(
         );
         return;
       }
-      const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(e, i+1, events.length);
+      const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(eventModel, i+1, events.length);
       const calEventId: string = await google.createEvent(
           eventGcalModel,
           Config.services.google.calendars[e.gcalCalendar!],

@@ -34,7 +34,7 @@ export const getEventDetailsToStore = (event: Event, hash: string | false) => {
   return e;
 };
 
-export const getEventDetailsForGcal = async (event: Event, eventNumber: number, totalEvents: number): Promise<GoogleEvent> => {
+export const getEventDetailsForGcal = async (event, eventNumber: number, totalEvents: number): Promise<GoogleEvent> => {
   const organizer: GoogleAttendee = {
     email: event.proposerEmail,
     organizer: true,
