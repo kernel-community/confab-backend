@@ -28,7 +28,8 @@ export default async function newEventHandler(
 
   for (let i = 0; i < events.length; i++) {
     const e = events[i];
-    const eventModel = getEventDetailsToStore(e, series);
+    let hash: string | false = e.hash ? e.hash : series;
+    const eventModel = getEventDetailsToStore(e, hash);
     const created = await db.createEvent(eventModel);
 
     if (e.createGcalEvent === true) {
