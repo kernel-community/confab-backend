@@ -166,6 +166,75 @@ class Database {
     });
     return events;
   }
+
+  public getAllEvents = async (type: 'live' | 'upcoming' | 'past') => {
+    let events;
+    switch (type) {
+      case 'live':
+        events = await prisma.event.findMany({
+          where: {
+            startDateTime: {
+              lte: new Date(), // starting before or now
+            },
+            endDateTime: {
+              gte: new Date(), // ending after or now
+            },
+          },
+          include: {
+            _count: {
+              select: {
+                RSVP: true,
+              },
+            },
+          },
+          distinct: ['hash'],
+        });
+        break;
+      case 'past':
+        events = await prisma.event.findMany({
+          where: {
+            startDateTime: {
+              lt: new Date(), // started before now
+            },
+            endDateTime: {
+              lt: new Date(), // ended before now
+            },
+          },
+          include: {
+            _count: {
+              select: {
+                RSVP: true,
+              },
+            },
+          },
+          distinct: ['hash'],
+        });
+        break;
+      case 'upcoming':
+        events = await prisma.event.findMany({
+          where: {
+            startDateTime: {
+              gt: new Date(), // starting after but not now
+            },
+            endDateTime: {
+              gt: new Date(), // ending after now
+            },
+          },
+          include: {
+            _count: {
+              select: {
+                RSVP: true,
+              },
+            },
+          },
+          distinct: ['hash'],
+        });
+    }
+    // @todo: fix this hack
+    // events = events.map((e) => Object.assign(e, {_count: e['_count']['RSVP']}));
+    events.forEach((e) => delete Object.assign(e, {['RSVP']: e['_count']['RSVP']})['_count']);
+    return events;
+  }
 }
 
 export default new Database();
