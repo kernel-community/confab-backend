@@ -30,7 +30,19 @@ export const newEventHandler = async (
     const e = events[i];
     const hash: string | false = e.hash ? e.hash : series;
     const eventModel = getEventDetailsToStore(e, hash);
-    const created = await db.createEvent(eventModel);
+    let created;
+    try {
+      created = await db.createEvent(eventModel);
+    } catch (e) {
+      console.log('[api/new] error in creating a new event', e);
+      next(
+          errorBuilder(
+              '[api/new] error in creating a new event',
+              500,
+              JSON.stringify(e),
+          ),
+      );
+    }
 
     if (e.createGcalEvent === true) {
       if (!e.gcalCalendar) {
