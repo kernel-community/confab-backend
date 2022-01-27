@@ -167,7 +167,7 @@ class Database {
     return events;
   }
 
-  public getAllEvents = async (type: 'live' | 'upcoming' | 'past') => {
+  public getAllEvents = async (type: 'live' | 'upcoming' | 'past' | 'all') => {
     let events;
     switch (type) {
       case 'live':
@@ -229,6 +229,19 @@ class Database {
           },
           distinct: ['hash'],
         });
+        break;
+      case 'all':
+        events = await prisma.event.findMany({
+          include: {
+            _count: {
+              select: {
+                RSVP: true,
+              },
+            },
+          },
+          distinct: ['hash'],
+        });
+        break;
     }
     // @todo: fix this hack
     // events = events.map((e) => Object.assign(e, {_count: e['_count']['RSVP']}));
