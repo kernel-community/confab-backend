@@ -1,13 +1,23 @@
-import {Response, NextFunction as Next} from 'express';
 import {RequestWithPayload} from 'types';
-
+import {NextFunction as Next, Response} from 'express';
 import db from '../../services/database';
 
-export default async function(
+export const fetchUserHandler = async (
     req: RequestWithPayload,
     res: Response,
     next: Next,
-) {
+) => {
+  // @ts-ignore
+  const {email}: {email: string} = req.query;
+  req.intermediatePayload = await db.getUser(email);
+  next();
+};
+
+export const updateUserHandler = async (
+    req: RequestWithPayload,
+    res: Response,
+    next: Next,
+) => {
   const {data} = req.body;
   const email = data.email;
   const payload = {
@@ -16,4 +26,4 @@ export default async function(
   };
   req.intermediatePayload = await db.updateUser(email, payload);
   next();
-}
+};

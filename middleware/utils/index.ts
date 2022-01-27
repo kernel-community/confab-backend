@@ -53,7 +53,7 @@ export const getEventDetailsForGcal = async (event, eventNumber: number, totalEv
     guestsCanSeeOtherGuests: true,
     guestsCanInviteOthers: true, // @note default = true; if required, can make this a param
     location: event.location,
-    description: event.descriptionText + `${
+    description: event.descriptionHtml + `${
       event.proposerName?
         `\n\n${'Proposer: ' + event.proposerName}`:
         ``

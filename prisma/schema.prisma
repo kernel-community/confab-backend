@@ -12,11 +12,12 @@ generator client {
 
 model Event {
   id              Int              @unique @default(autoincrement())
+  createdAt       DateTime         @default(now())
   title           String
   descriptionText String?
   descriptionHtml String?
-  startDateTime   String
-  endDateTime     String
+  startDateTime   DateTime
+  endDateTime     DateTime
   location        String
   hash            String
   series          Boolean
@@ -47,12 +48,12 @@ model TagsOnPosts {
 }
 
 model User {
-  email         String      @unique
+  email         String   @unique
   username      String?
   firstName     String?
   lastName      String?
   block         Int?
-  sendReminders Boolean?    @default(false)
+  sendReminders Boolean? @default(false)
   Event         Event[]
 }
 

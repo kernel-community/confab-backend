@@ -18,17 +18,17 @@ import {
   prepareSlackMessage,
 } from '../utils';
 
-export default async function newEventHandler(
+export const newEventHandler = async (
     req: RequestWithPayload,
     res: Response,
     next: Next,
-) {
+) => {
   const events: Event[] = req.body.data;
   const series: string | false = events.length > 1 ? nanoid(10) : false;
 
   for (let i = 0; i < events.length; i++) {
     const e = events[i];
-    let hash: string | false = e.hash ? e.hash : series;
+    const hash: string | false = e.hash ? e.hash : series;
     const eventModel = getEventDetailsToStore(e, hash);
     const created = await db.createEvent(eventModel);
 
@@ -39,15 +39,20 @@ export default async function newEventHandler(
         );
         return;
       }
-      const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(eventModel, i+1, events.length);
-      const calEventId: string = await google.createEvent(
-          eventGcalModel,
-          Config.services.google.calendars[e.gcalCalendar!],
-      );
-      await db.createGCalEvent(
-          created.id,
-          Config.services.google.calendars[e.gcalCalendar!],
-          calEventId);
+      try {
+        const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(eventModel, i+1, events.length);
+        const calEventId: string = await google.createEvent(
+            eventGcalModel,
+            Config.services.google.calendars[e.gcalCalendar!],
+        );
+        await db.createGCalEvent(
+            created.id,
+            Config.services.google.calendars[e.gcalCalendar!],
+            calEventId);
+      } catch (e) {
+        console.log(e);
+        next(errorBuilder('error in creating event', 500, JSON.stringify(e)));
+      }
     }
     if (i==0) {
       let slackMessage: SlackEventMessage;
@@ -63,18 +68,27 @@ export default async function newEventHandler(
           );
           return;
         }
-        const messageId: string = await slack.sendEventMessage(
-            slackMessage,
-            Config.services.slack.channels[events[i].slackChannel!],
-        );
-        await db.createSlackMessage(
-            created.id,
-            Config.services.slack.channels[events[0].slackChannel!],
-            messageId,
-        );
+        try {
+          const messageId: string = await slack.sendEventMessage(
+              slackMessage,
+              Config.services.slack.channels[events[i].slackChannel!],
+          );
+          await db.createSlackMessage(
+              created.id,
+              Config.services.slack.channels[events[0].slackChannel!],
+              messageId,
+          );
+        } catch (e) {
+          next(
+              errorBuilder(
+                  'error in sending to slack',
+                  500,
+                  JSON.stringify(e),
+              ),
+          );
+        }
       }
     }
-
     req.intermediatePayload = {
       id: created.id,
       hash: created.hash,
