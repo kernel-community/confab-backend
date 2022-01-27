@@ -167,11 +167,21 @@ class Database {
     return events;
   }
 
-  public getAllEvents = async (type: 'live' | 'upcoming' | 'past' | 'all') => {
+  public getAllEvents = async ({
+    type = 'all',
+    take = 6,
+    skip,
+  } : {
+    type?: 'live' | 'upcoming' | 'past' | 'all',
+    take?: number,
+    skip?: number
+  }) => {
     let events;
     switch (type) {
       case 'live':
         events = await prisma.event.findMany({
+          take,
+          skip,
           where: {
             startDateTime: {
               lte: new Date(), // starting before or now
@@ -192,6 +202,8 @@ class Database {
         break;
       case 'past':
         events = await prisma.event.findMany({
+          take,
+          skip,
           where: {
             startDateTime: {
               lt: new Date(), // started before now
@@ -208,10 +220,15 @@ class Database {
             },
           },
           distinct: ['hash'],
+          orderBy: {
+            startDateTime: 'desc',
+          },
         });
         break;
       case 'upcoming':
         events = await prisma.event.findMany({
+          take,
+          skip,
           where: {
             startDateTime: {
               gt: new Date(), // starting after but not now
@@ -228,10 +245,15 @@ class Database {
             },
           },
           distinct: ['hash'],
+          orderBy: {
+            startDateTime: 'asc',
+          },
         });
         break;
       case 'all':
         events = await prisma.event.findMany({
+          take,
+          skip,
           include: {
             _count: {
               select: {

@@ -8,8 +8,17 @@ export const fetchAllEventsHandler = async (
     next: Next,
 ) => {
   // @ts-ignore
-  const {type}: {type: 'live' | 'upcoming' | 'past'} = req.query;
-  req.intermediatePayload = await db.getAllEvents(type);
+  const {
+    type,
+    take,
+    skip,
+  }: {
+    type: 'live' | 'upcoming' | 'past' | 'all',
+    take?:number,
+    skip?:number
+  } = req.query;
+  req.intermediatePayload = await db.getAllEvents({type, take, skip});
+  console.log(req.intermediatePayload);
   next();
 };
 
