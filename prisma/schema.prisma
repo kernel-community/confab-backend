@@ -25,26 +25,11 @@ model Event {
   typeId          Int
   type            EventType        @relation(fields: [typeId], references: [id])
   proposerEmail   String
+  Notes           String[]
   proposer        User             @relation(fields: [proposerEmail], references: [email])
   RSVP            RSVP[]
   GoogleCalendar  GoogleCalendar[]
   Slack           Slack[]
-  Tags            TagsOnPosts[]
-}
-
-model Tag {
-  id    Int           @unique @default(autoincrement())
-  name  String
-  Event TagsOnPosts[]
-}
-
-model TagsOnPosts {
-  event   Event @relation(fields: [eventId], references: [id])
-  eventId Int
-  tag     Tag   @relation(fields: [tagId], references: [id])
-  tagId   Int
-
-  @@id([eventId, tagId])
 }
 
 model User {
@@ -52,8 +37,6 @@ model User {
   username      String?
   firstName     String?
   lastName      String?
-  block         Int?
-  sendReminders Boolean? @default(false)
   Event         Event[]
 }
 
