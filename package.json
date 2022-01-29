@@ -4,12 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start:local": "nodemon index.ts",
+    "dev": "nodemon -r tsconfig-paths/register index.ts",
+    "build": "tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./ -o ./dist",
     "prepare": "husky install",
     "lint": "prettier --write .",
-    "build": "tsc",
-    "start": "",
-    "studio": "prisma studio --port 5000"
+    "studio": "prisma studio --port 5555"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"
@@ -35,16 +34,19 @@
     "@types/express": "^4.17.13",
     "@types/luxon": "^2.0.4",
     "@types/node": "^16.9.1",
-    "@typescript-eslint/eslint-plugin": "^4.33.0",
-    "@typescript-eslint/parser": "^4.33.0",
-    "eslint": "^7.32.0",
-    "eslint-config-google": "^0.14.0",
+    "@typescript-eslint/eslint-plugin": "^5.10.1",
+    "@typescript-eslint/parser": "^5.10.1",
+    "eslint": "^8.8.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.4",
     "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
     "nodemon": "^2.0.12",
-    "prettier": "2.4.0",
     "prisma": "3.0.2",
     "ts-node": "^10.2.1",
+    "tsconfig-paths": "^3.12.0",
+    "tscpaths": "^0.0.9",
     "typescript": "^4.4.2"
   }
 }

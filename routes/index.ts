@@ -1,4 +1,4 @@
-import {Router} from 'express';
+import { Router } from 'express';
 import {
   pingErrorHandler,
   pingHandler,
@@ -15,7 +15,7 @@ import {
 const router = Router();
 
 export default (client) => {
-  const {server} = client;
+  const { server } = client;
   server.use('/', router);
 
   /**
@@ -32,6 +32,10 @@ export default (client) => {
   router.get('/event/:hash', fetchEventHandler, responseHandler); // get event by id
   router.get('/events', fetchAllEventsHandler, responseHandler); // fetch all events (type = live / upcoming / past)
   router.post('/new', newEventHandler, responseHandler);
+
+  /**
+   * router.post('/event/archive', archiveEventHandler, responseHandler);
+   */ // @todo: add event to archive
 
   /**
    * RSVP

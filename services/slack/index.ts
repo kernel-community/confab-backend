@@ -1,16 +1,18 @@
 /* eslint-disable no-invalid-this */
-import {WebClient} from '@slack/web-api';
-import {SlackEventMessage} from 'types';
+import { WebClient } from '@slack/web-api';
+import { SlackEventMessage } from 'types';
 import * as Config from '../../config/index.json';
 
 class SlackService {
   public slack: WebClient;
+
   constructor() {
     this.slack = new WebClient(Config.services.slack.kernelBot.botToken);
   }
+
   public sendEventMessage = async (
-      message: SlackEventMessage,
-      channelId: string,
+    message: SlackEventMessage,
+    channelId: string,
   ): Promise<string> => {
     const response = await this.slack.chat.postMessage({
       channel: channelId,

@@ -1,14 +1,14 @@
-import {ErrorBuilder} from '../../types';
-import {nanoid} from 'nanoid';
+import { nanoid } from 'nanoid';
 import {
   Event,
   GoogleEvent,
   GoogleAttendee,
   SlackMessageBlocks,
   SlackEventMessage,
-} from '../../types';
-import db from '../../services/database';
-import applicationUrl from './convoUrl';
+  ErrorBuilder,
+} from '@app/types';
+import db from '@app/services/database';
+import applicationUrl from '@app/utils/convoUrl';
 
 export const errorBuilder: ErrorBuilder = (message, status, logData) => ({
   message,
@@ -18,8 +18,8 @@ export const errorBuilder: ErrorBuilder = (message, status, logData) => ({
 
 export const getEventDetailsToStore = (event: Event, hash: string | false) => {
   const e = {
-    hash: hash == false ? nanoid(10) : hash,
-    series: hash == false ? false : true,
+    hash: hash === false ? nanoid(10) : hash,
+    series: hash != false,
     title: event.title,
     descriptionText: event.descriptionText,
     descriptionHtml: event.descriptionHtml,
@@ -42,7 +42,7 @@ export const getEventDetailsForGcal = async (event, eventNumber: number, totalEv
   };
   const typeString = (await db.getType(Number(event.typeId!)))?.type;
   return {
-    summary: `[` + typeString + `] ` + event.title + `${totalEvents > 1 ? (` (${eventNumber} of ${totalEvents})`): ''}`,
+    summary: `[${typeString}] ${event.title}${totalEvents > 1 ? (` (${eventNumber} of ${totalEvents})`) : ''}`,
     attendees: [organizer],
     start: {
       dateTime: event.startDateTime,
@@ -53,30 +53,28 @@ export const getEventDetailsForGcal = async (event, eventNumber: number, totalEv
     guestsCanSeeOtherGuests: true,
     guestsCanInviteOthers: true, // @note default = true; if required, can make this a param
     location: event.location,
-    description: event.descriptionHtml + `${
-      event.proposerName?
-        `\n\n${'Proposer: ' + event.proposerName}`:
-        ``
+    description: `${event.descriptionHtml}${
+      event.proposerName
+        ? `\n\n${`Proposer: ${event.proposerName}`}`
+        : ''
     }` + `${
-      `\nRSVP here: https://convo.kernel.community/rsvp/` + event.hash
+      `\nRSVP here: https://convo.kernel.community/rsvp/${event.hash}`
     }`,
   };
 };
 
-const prepareEventURL = (hash: string | false): string => {
-  return applicationUrl + '/rsvp/' + hash;
-};
+const prepareEventURL = (hash: string | false): string => `${applicationUrl}/rsvp/${hash}`;
 
 export const prepareSlackMessage = async (
-    event,
+  event,
 ): Promise<SlackEventMessage> => {
   const proposer = await db.getUserName(event.proposerEmail);
   const type = await db.getType(Number(event.typeId!));
   const title = event.title
-      .replace(/[&\/\\#+$~%'":*?<>@^{}]/g, '');
+    .replace(/[&\/\\#+$~%'":*?<>@^{}]/g, '');
   let description = event.descriptionText!
-      .replace(/[&\/\\#+$~%'":*?<>@^{}]/g, '')
-      .substring(0, 200);
+    .replace(/[&\/\\#+$~%'":*?<>@^{}]/g, '')
+    .substring(0, 200);
   if (description.length > 200) description += '...';
 
   const blocks: SlackMessageBlocks[] = [];
@@ -84,7 +82,7 @@ export const prepareSlackMessage = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: '*' + proposer + '*' + ' has proposed a new ' + type?.type + '!',
+      text: `*${proposer}*` + ` has proposed a new ${type?.type}!`,
     },
   });
   blocks.push({
@@ -94,7 +92,7 @@ export const prepareSlackMessage = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: title + '\n' + description,
+      text: `${title}\n${description}`,
     },
   });
   if (event.series) {
@@ -113,18 +111,18 @@ export const prepareSlackMessage = async (
         type: 'button',
         text: {
           type: 'plain_text',
-          text: Number(event.typeId!) == 3 ? 'Book a Slot' : 'Read more',
+          text: Number(event.typeId!) === 3 ? 'Book a Slot' : 'Read more',
           emoji: true,
         },
         value: 'click-0',
         action_id: 'actionId-0',
-        url: Number(event.typeId!) == 3 ? event.location : prepareEventURL(event.hash!),
+        url: Number(event.typeId!) === 3 ? event.location : prepareEventURL(event.hash!),
       },
     ],
   });
   return {
     blocks,
     icon: type?.emoji!,
-    username: 'New ' + type?.type + ' scheduled',
+    username: `New ${type?.type} scheduled`,
   };
 };

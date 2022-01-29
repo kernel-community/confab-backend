@@ -1,24 +1,23 @@
-import {RequestWithPayload} from 'types';
-import {NextFunction as Next, Response} from 'express';
-import {Attendee} from '../../types';
-import {errorBuilder} from '../utils';
-import db from '../../services/database';
-import google from '../../services/google';
+import { RequestWithPayload, Attendee } from '@app/types';
+import { NextFunction as Next, Response } from 'express';
+import { errorBuilder } from '@app/utils';
+import db from '@app/services/database';
+import google from '@app/services/google';
 
 export default async function rsvpHandler(
-    req: RequestWithPayload,
-    res: Response,
-    next: Next,
+  req: RequestWithPayload,
+  res: Response,
+  next: Next,
 ) {
   const attendee: Attendee = req.body.data;
-  const eventId: number[] = attendee.eventId;
+  const { eventId } = attendee;
   if (eventId.length < 1) {
     next(
-        errorBuilder(
-            'eventid array required',
-            500,
-            JSON.stringify(eventId),
-        ),
+      errorBuilder(
+        'eventid array required',
+        500,
+        JSON.stringify(eventId),
+      ),
     );
     return;
   }
@@ -30,7 +29,7 @@ export default async function rsvpHandler(
     if (eventExistsInRsvp) {
       attendeesToStore = await db.getAttendees(id);
     }
-    const alreadyRsvpd:boolean = attendeesToStore.find((attendee) => attendee == attendeeEmail)? true : false;
+    const alreadyRsvpd:boolean = !!attendeesToStore.find((attendee) => attendee == attendeeEmail);
     if (!alreadyRsvpd) {
       attendeesToStore.push(attendee.email);
       await db.rsvp(id, attendee.email, eventExistsInRsvp, attendeesToStore);
@@ -42,4 +41,4 @@ export default async function rsvpHandler(
     }
   }
   next();
-};
+}

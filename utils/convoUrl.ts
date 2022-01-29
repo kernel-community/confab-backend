@@ -1,4 +1,4 @@
-import * as Config from '../../config/index.json';
+import * as Config from '../config/index.json';
 
 const env = process.env.ENV || 'dev';
 
