@@ -1,7 +1,7 @@
 import { RequestWithPayload, Attendee } from '@app/types';
 import { NextFunction as Next, Response } from 'express';
 import { errorBuilder } from '@app/utils';
-import db from '@app/services/database';
+import * as db from '@app/services/database';
 import google from '@app/services/google';
 
 export default async function rsvpHandler(

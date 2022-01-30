@@ -6,7 +6,7 @@ import {
 } from '@app/types';
 import { NextFunction as Next, Response } from 'express';
 import { nanoid } from 'nanoid';
-import db from '@app/services/database';
+import * as db from '@app/services/database';
 import google from '@app/services/google';
 import slack from '@app/services/slack';
 import * as Config from '@app/config/index.json';

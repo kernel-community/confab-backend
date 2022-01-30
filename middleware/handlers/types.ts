@@ -1,6 +1,6 @@
 import { RequestWithPayload } from '@app/types';
 import { NextFunction as Next, Response } from 'express';
-import db from '@app/services/database';
+import * as db from '@app/services/database';
 
 export const eventTypesHandler = async (
   req: RequestWithPayload,

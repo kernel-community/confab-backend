@@ -1,6 +1,6 @@
 import { RequestWithPayload } from 'types';
 import { NextFunction as Next, Response } from 'express';
-import db from '@app/services/database';
+import * as db from '@app/services/database';
 
 export const fetchAllEventsHandler = async (
   req: RequestWithPayload,
@@ -12,12 +12,16 @@ export const fetchAllEventsHandler = async (
     type,
     take,
     skip,
+    now,
   }: {
-    type: 'live' | 'upcoming' | 'past' | 'all',
+    type: 'live' | 'upcoming' | 'past' | 'today' | 'week' | 'month',
     take?:number,
-    skip?:number
+    skip?:number,
+    now: Date
   } = req.query;
-  req.intermediatePayload = await db.getAllEvents({ type, take, skip });
+  req.intermediatePayload = await db.getAllEvents({
+    type, take, skip, now,
+  });
   next();
 };
 

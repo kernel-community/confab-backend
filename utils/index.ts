@@ -7,7 +7,7 @@ import {
   SlackEventMessage,
   ErrorBuilder,
 } from '@app/types';
-import db from '@app/services/database';
+import * as db from '@app/services/database';
 import applicationUrl from '@app/utils/convoUrl';
 
 export const errorBuilder: ErrorBuilder = (message, status, logData) => ({
