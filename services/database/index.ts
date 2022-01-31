@@ -177,16 +177,6 @@ export const getEventDetails = async (hash: string): Promise<EventSchema[]> => {
   });
   return events;
 };
-const getFields = (start, end) => ({
-  where: {
-    startDateTime: {
-      gte: start,
-    },
-    endDateTime: {
-      lt: end,
-    },
-  },
-});
 export const getAllEvents = async ({
   type,
   take = 6,

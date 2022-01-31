@@ -20,7 +20,7 @@ export const fetchAllEventsHandler = async (
     now: Date
   } = req.query;
   req.intermediatePayload = await db.getAllEvents({
-    type, take, skip, now,
+    type, take: take ? Number(take) : undefined, skip: skip ? Number(skip) : undefined, now,
   });
   next();
 };
