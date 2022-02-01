@@ -183,12 +183,14 @@ export const getAllEvents = async ({
   skip,
   now,
   fromId = undefined,
+  types,
 } : {
     type: 'live' | 'upcoming' | 'past' | 'today' | 'week' | 'month',
     take?: number,
     skip?: number,
     now: Date,
     fromId?: number | undefined,
+    types?:number[]
   }) => {
   let events: any;
   const Now = new Date(now);
@@ -196,6 +198,12 @@ export const getAllEvents = async ({
   const sevenDaysFromNow = DateTime.fromJSDate(Now).plus({ days: 7 }).toJSDate();
   const startOfNextMonth = DateTime.fromJSDate(Now).plus({ months: 1 }).startOf('month').toJSDate();
   const cursorObj = fromId ? { id: fromId } : undefined;
+  const noTypesFilter = types && types.length === 0;
+  const typeId = noTypesFilter ? {} : {
+    typeId: {
+      in: types,
+    },
+  };
   const includes = {
     take,
     skip,
@@ -221,6 +229,7 @@ export const getAllEvents = async ({
           endDateTime: {
             lt: Now,
           },
+          ...typeId,
         },
         orderBy: {
           startDateTime: 'asc',
@@ -238,9 +247,7 @@ export const getAllEvents = async ({
           endDateTime: {
             lt: Now, // ended before now
           },
-          typeId: {
-            in: [1, 2],
-          },
+          ...typeId,
         },
         distinct: ['hash'],
         orderBy: {
@@ -258,6 +265,7 @@ export const getAllEvents = async ({
           endDateTime: {
             gt: Now, // ending after now
           },
+          ...typeId,
         },
         distinct: ['hash'],
         orderBy: {
@@ -275,6 +283,7 @@ export const getAllEvents = async ({
           endDateTime: {
             lt: tomorrow12Am,
           },
+          ...typeId,
         },
         distinct: ['hash'],
         orderBy: {
@@ -292,6 +301,7 @@ export const getAllEvents = async ({
           endDateTime: {
             lt: sevenDaysFromNow,
           },
+          ...typeId,
         },
         distinct: ['hash'],
         orderBy: {
@@ -309,6 +319,7 @@ export const getAllEvents = async ({
           endDateTime: {
             lt: startOfNextMonth,
           },
+          ...typeId,
         },
         distinct: ['hash'],
         orderBy: {

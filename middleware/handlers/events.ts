@@ -14,12 +14,14 @@ export const fetchAllEventsHandler = async (
     skip,
     now,
     fromId,
+    types,
   }: {
     type: 'live' | 'upcoming' | 'past' | 'today' | 'week' | 'month',
     take?:number,
     skip?:number,
     now: Date,
-    fromId?: number
+    fromId?: number,
+    types:string
   } = req.query;
   req.intermediatePayload = await db.getAllEvents({
     type,
@@ -27,6 +29,7 @@ export const fetchAllEventsHandler = async (
     skip: skip ? Number(skip) : undefined,
     now,
     fromId: fromId ? Number(fromId) : undefined,
+    types: types.length > 0 ? types.split(',').map((t) => parseInt(t, 10)) : [],
   });
   next();
 };
