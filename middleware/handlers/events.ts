@@ -13,14 +13,20 @@ export const fetchAllEventsHandler = async (
     take,
     skip,
     now,
+    fromId,
   }: {
     type: 'live' | 'upcoming' | 'past' | 'today' | 'week' | 'month',
     take?:number,
     skip?:number,
-    now: Date
+    now: Date,
+    fromId?: number
   } = req.query;
   req.intermediatePayload = await db.getAllEvents({
-    type, take: take ? Number(take) : undefined, skip: skip ? Number(skip) : undefined, now,
+    type,
+    take: take ? Number(take) : undefined,
+    skip: skip ? Number(skip) : undefined,
+    now,
+    fromId: fromId ? Number(fromId) : undefined,
   });
   next();
 };

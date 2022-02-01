@@ -182,17 +182,20 @@ export const getAllEvents = async ({
   take = 6,
   skip,
   now,
+  fromId = undefined,
 } : {
     type: 'live' | 'upcoming' | 'past' | 'today' | 'week' | 'month',
     take?: number,
     skip?: number,
-    now: Date
+    now: Date,
+    fromId?: number | undefined,
   }) => {
   let events: any;
   const Now = new Date(now);
   const tomorrow12Am = DateTime.fromJSDate(Now).plus({ days: 1 }).startOf('day').toJSDate();
   const sevenDaysFromNow = DateTime.fromJSDate(Now).plus({ days: 7 }).toJSDate();
   const startOfNextMonth = DateTime.fromJSDate(Now).plus({ months: 1 }).startOf('month').toJSDate();
+  const cursorObj = fromId ? { id: fromId } : undefined;
   const includes = {
     take,
     skip,
@@ -205,6 +208,7 @@ export const getAllEvents = async ({
       type: true,
       proposer: true,
     },
+    cursor: cursorObj,
   };
   switch (type) {
     case 'live':
@@ -233,6 +237,9 @@ export const getAllEvents = async ({
           },
           endDateTime: {
             lt: Now, // ended before now
+          },
+          typeId: {
+            in: [1, 2],
           },
         },
         distinct: ['hash'],
