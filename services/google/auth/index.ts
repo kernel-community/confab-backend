@@ -19,5 +19,16 @@ export const getAuth = async () => {
     throw new Error('run getAccessToken.ts');
   }
   oAuth2Client.setCredentials(JSON.parse(token));
+  await oAuth2Client.refreshAccessToken((err, rtoken) => {
+    console.log('storing refreshed token');
+    fs.writeFile(
+      Config.services.google.pathToToken,
+      JSON.stringify(rtoken),
+      (err) => {
+        if (err) return console.error(err);
+        console.log('Token stored to', Config.services.google.pathToToken);
+      },
+    );
+  });
   return oAuth2Client;
 };
