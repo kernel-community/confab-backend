@@ -82,7 +82,7 @@ export const prepareSlackMessage = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `*${proposer}*` + ` has proposed a new ${type?.type}!`,
+      text: `*${proposer}*` + ` has proposed a new Convo!`,
     },
   });
   blocks.push({
@@ -92,7 +92,7 @@ export const prepareSlackMessage = async (
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `${title}\n${description}`,
+      text: `*${title}*\n${description}`,
     },
   });
   if (event.series) {
@@ -122,7 +122,7 @@ export const prepareSlackMessage = async (
   });
   return {
     blocks,
-    icon: type?.emoji!,
-    username: `New ${type?.type} scheduled`,
+    icon: 'speech_balloon',
+    username: `New Convo Scheduled`,
   };
 };
