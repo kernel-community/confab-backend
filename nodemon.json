@@ -1,0 +1,4 @@
+{
+  "watch": ["index.ts", "routes/", "services/", "utils/", "middleware/", "prisma/", "server.ts"],
+  "ext": "ts, js"
+}
