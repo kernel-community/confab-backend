@@ -42,7 +42,7 @@ export const getEventDetailsForGcal = async (event, eventNumber: number, totalEv
   };
   const typeString = (await db.getType(Number(event.typeId!)))?.type;
   return {
-    summary: `[${typeString}] ${event.title}${totalEvents > 1 ? (` (${eventNumber} of ${totalEvents})`) : ''}`,
+    summary: `${event.title}${totalEvents > 1 ? (` (${eventNumber} of ${totalEvents})`) : ''}`,
     attendees: [organizer],
     start: {
       dateTime: event.startDateTime,
