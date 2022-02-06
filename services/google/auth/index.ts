@@ -18,6 +18,7 @@ export const getAuth = async () => {
   } catch (err) {
     throw new Error('run getAccessToken.ts');
   }
+  // @todo: fix this
   oAuth2Client.setCredentials(JSON.parse(token));
   await oAuth2Client.refreshAccessToken((err, rtoken) => {
     console.log('storing refreshed token');
@@ -30,5 +31,6 @@ export const getAuth = async () => {
       },
     );
   });
+  oAuth2Client.setCredentials(JSON.parse(token));
   return oAuth2Client;
 };
