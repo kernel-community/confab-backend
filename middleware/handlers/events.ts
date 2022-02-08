@@ -23,6 +23,10 @@ export const fetchAllEventsHandler = async (
     fromId?: number,
     types:string
   } = req.query;
+  if (!types) {
+    next('no types found');
+    return;
+  }
   req.intermediatePayload = await db.getAllEvents({
     type,
     take: take ? Number(take) : undefined,

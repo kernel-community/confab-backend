@@ -208,13 +208,9 @@ export const getAllEvents = async ({
     take,
     skip,
     include: {
-      _count: {
-        select: {
-          RSVP: true,
-        },
-      },
       type: true,
       proposer: true,
+      RSVP: true,
     },
     cursor: cursorObj,
   };
@@ -330,9 +326,8 @@ export const getAllEvents = async ({
     default:
       return;
   }
-  // @todo: fix this hack
-  // eslint-disable-next-line no-underscore-dangle
-  events.forEach((e) => delete Object.assign(e, { RSVP: e._count.RSVP })._count);
+
+  events.forEach((e) => Object.assign(e, { RSVP: e.RSVP[0]?.attendees.length }));
   events.forEach((e) => delete Object.assign(e, { proposerName: e.proposer.firstName }).proposer);
   // eslint-disable-next-line consistent-return
   return events;
