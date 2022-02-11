@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 import { RequestWithPayload, Attendee } from '@app/types';
 import { NextFunction as Next, Response } from 'express';
 import { errorBuilder } from '@app/utils';
@@ -21,24 +22,21 @@ export default async function rsvpHandler(
     );
     return;
   }
-  for (let i = 0; i < eventId.length; i++) {
-    let attendeesToStore: string[] = [];
-    const attendeeEmail: string = attendee.email.toLowerCase();
-    const id = Number(eventId[i]);
-    const eventExistsInRsvp: boolean = await db.eventExistsInRsvp(id);
-    if (eventExistsInRsvp) {
-      attendeesToStore = await db.getAttendees(id);
-    }
-    const alreadyRsvpd:boolean = !!attendeesToStore.find((attendee) => attendee == attendeeEmail);
-    if (!alreadyRsvpd) {
-      attendeesToStore.push(attendee.email);
-      await db.rsvp(id, attendee.email, eventExistsInRsvp, attendeesToStore);
-    }
-    const eventExistsInGCal: boolean = await db.eventExistsInGCal(id);
-    if (eventExistsInGCal) {
-      const gCal = await db.getGCalEvent(id);
-      await google.rsvp(gCal.event, gCal.calendar, attendee.email);
-    }
-  }
+  const attendees = await Promise.all(eventId.map((i) => db.getAttendees(i)));
+  await Promise.all(eventId.map((i, k) => {
+    if (attendees[k].find((a) => a === attendee.email.toLowerCase())) return;
+    return db.rsvp(
+      i,
+      [...attendees[k], attendee.email.toLowerCase()],
+    );
+  }));
+  const g = await Promise.all(eventId.map((i) => db.eventExistsInGCal(i)));
+  const gevents = await Promise.all(eventId.map((i, k) => (g[k] ? db.getGCalEvent(i) : null)));
+  await Promise.all(
+    gevents.map((e) => {
+      if (!e) return;
+      return google.rsvp(e.event, e.calendar, attendee.email);
+    }),
+  );
   next();
 }
