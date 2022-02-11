@@ -1,4 +1,4 @@
-import { EventType, Event as EventSchema } from '.prisma/client';
+import { EventType, Event as EventSchema, RSVP } from '.prisma/client';
 import { DateTime } from 'luxon';
 import Prisma from './client';
 
@@ -100,29 +100,24 @@ export const getType = async (id: number) => {
 };
 export const rsvp = async (
   eventId: number,
-  email: string,
-  exists: boolean,
   attendees: string[],
-): Promise<void> => {
-  if (exists) {
-    await prisma.rSVP.update({
-      where: { eventId },
-      data: { attendees },
-    });
-  } else {
-    await prisma.rSVP.create({
-      data: {
-        event: { connect: { id: eventId } },
-        attendees,
-      },
-    });
-  }
-};
+): Promise<RSVP> => prisma.rSVP.upsert({
+  update: {
+    attendees,
+  },
+  where: {
+    eventId,
+  },
+  create: {
+    event: { connect: { id: eventId } },
+    attendees,
+  },
+});
 export const getAttendees = async (eventId: number): Promise<string[]> => {
   const rsvp = await prisma.rSVP.findFirst({
     where: { eventId },
   });
-  return rsvp!.attendees;
+  return rsvp ? rsvp.attendees : [];
 };
 
 export const getEventIdByHash = async (hash: string): Promise<number> => {
