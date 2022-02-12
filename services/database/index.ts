@@ -4,7 +4,9 @@ import Prisma from './client';
 
 export const prisma = Prisma;
 export const disconnect = () => prisma.$disconnect();
-export const createEvent = async (e): Promise<{ id: number, hash: string, type: EventType }> => {
+export const createEvent = async (
+  e
+): Promise<{ id: number; hash: string; type: EventType }> => {
   const r = await prisma.event.create({
     data: {
       title: e.title,
@@ -43,7 +45,7 @@ export const createEvent = async (e): Promise<{ id: number, hash: string, type: 
 export const createGCalEvent = async (
   eventId: number,
   calendarId: string,
-  calEventId: string,
+  calEventId: string
 ): Promise<void> => {
   await prisma.googleCalendar.create({
     data: {
@@ -58,7 +60,7 @@ export const createGCalEvent = async (
 export const createSlackMessage = async (
   eventId: number,
   channelId: string,
-  messageId: string,
+  messageId: string
 ): Promise<void> => {
   await prisma.slack.create({
     data: {
@@ -79,18 +81,20 @@ export const getUserName = async (email: string) => {
   return name?.firstName;
 };
 
-export const getUser = (email: string) => prisma.user.findUnique({
-  where: { email },
-});
+export const getUser = (email: string) =>
+  prisma.user.findUnique({
+    where: { email },
+  });
 
-export const updateUser = (email, data) => prisma.user.upsert({
-  where: { email },
-  update: data,
-  create: {
-    email,
-    ...data,
-  },
-});
+export const updateUser = (email, data) =>
+  prisma.user.upsert({
+    where: { email },
+    update: data,
+    create: {
+      email,
+      ...data,
+    },
+  });
 export const getType = async (id: number) => {
   const t = await prisma.eventType.findUnique({
     where: { id },
@@ -98,6 +102,7 @@ export const getType = async (id: number) => {
   });
   return t;
 };
+
 export const rsvp = async (
   eventId: number,
   attendees: string[],
@@ -113,6 +118,7 @@ export const rsvp = async (
     attendees,
   },
 });
+
 export const getAttendees = async (eventId: number): Promise<string[]> => {
   const rsvp = await prisma.rSVP.findFirst({
     where: { eventId },
@@ -142,7 +148,7 @@ export const eventExistsInGCal = async (id: number): Promise<boolean> => {
 };
 
 export const getGCalEvent = async (
-  id: number,
+  id: number
 ): Promise<{ event: string; calendar: string }> => {
   const gcal = await prisma.googleCalendar.findUnique({
     where: { eventId: id },
@@ -167,7 +173,7 @@ export const getEventDetails = async (hash: string): Promise<EventSchema[]> => {
       RSVP: true,
     },
     orderBy: {
-      startDateTime: 'asc',
+      startDateTime: "asc",
     },
   });
   return events;
@@ -179,26 +185,36 @@ export const getAllEvents = async ({
   now,
   fromId = undefined,
   types,
-} : {
-    type: 'live' | 'upcoming' | 'past' | 'today' | 'week' | 'month',
-    take?: number,
-    skip?: number,
-    now: Date,
-    fromId?: number | undefined,
-    types?:number[]
-  }) => {
+}: {
+  type: "live" | "upcoming" | "past" | "today" | "week" | "month";
+  take?: number;
+  skip?: number;
+  now: Date;
+  fromId?: number | undefined;
+  types?: number[];
+}) => {
   let events: any;
   const Now = new Date(now);
-  const tomorrow12Am = DateTime.fromJSDate(Now).plus({ days: 1 }).startOf('day').toJSDate();
-  const sevenDaysFromNow = DateTime.fromJSDate(Now).plus({ days: 7 }).toJSDate();
-  const startOfNextMonth = DateTime.fromJSDate(Now).plus({ months: 1 }).startOf('month').toJSDate();
+  const tomorrow12Am = DateTime.fromJSDate(Now)
+    .plus({ days: 1 })
+    .startOf("day")
+    .toJSDate();
+  const sevenDaysFromNow = DateTime.fromJSDate(Now)
+    .plus({ days: 7 })
+    .toJSDate();
+  const startOfNextMonth = DateTime.fromJSDate(Now)
+    .plus({ months: 1 })
+    .startOf("month")
+    .toJSDate();
   const cursorObj = fromId ? { id: fromId } : undefined;
   const noTypesFilter = types && types.length === 0;
-  const typeId = noTypesFilter ? {} : {
-    typeId: {
-      in: types,
-    },
-  };
+  const typeId = noTypesFilter
+    ? {}
+    : {
+        typeId: {
+          in: types,
+        },
+      };
   const includes = {
     take,
     skip,
@@ -210,7 +226,7 @@ export const getAllEvents = async ({
     cursor: cursorObj,
   };
   switch (type) {
-    case 'live':
+    case "live":
       events = await prisma.event.findMany({
         ...includes,
         where: {
@@ -223,12 +239,12 @@ export const getAllEvents = async ({
           ...typeId,
         },
         orderBy: {
-          startDateTime: 'asc',
+          startDateTime: "asc",
         },
-        distinct: ['hash'],
+        distinct: ["hash"],
       });
       break;
-    case 'past':
+    case "past":
       events = await prisma.event.findMany({
         ...includes,
         where: {
@@ -240,13 +256,13 @@ export const getAllEvents = async ({
           },
           ...typeId,
         },
-        distinct: ['hash'],
+        distinct: ["hash"],
         orderBy: {
-          startDateTime: 'desc',
+          startDateTime: "desc",
         },
       });
       break;
-    case 'upcoming':
+    case "upcoming":
       events = await prisma.event.findMany({
         ...includes,
         where: {
@@ -258,13 +274,13 @@ export const getAllEvents = async ({
           },
           ...typeId,
         },
-        distinct: ['hash'],
+        distinct: ["hash"],
         orderBy: {
-          startDateTime: 'asc',
+          startDateTime: "asc",
         },
       });
       break;
-    case 'today':
+    case "today":
       events = await prisma.event.findMany({
         ...includes,
         where: {
@@ -276,13 +292,13 @@ export const getAllEvents = async ({
           },
           ...typeId,
         },
-        distinct: ['hash'],
+        distinct: ["hash"],
         orderBy: {
-          startDateTime: 'asc',
+          startDateTime: "asc",
         },
       });
       break;
-    case 'week':
+    case "week":
       events = await prisma.event.findMany({
         ...includes,
         where: {
@@ -294,13 +310,13 @@ export const getAllEvents = async ({
           },
           ...typeId,
         },
-        distinct: ['hash'],
+        distinct: ["hash"],
         orderBy: {
-          startDateTime: 'asc',
+          startDateTime: "asc",
         },
       });
       break;
-    case 'month':
+    case "month":
       events = await prisma.event.findMany({
         ...includes,
         where: {
@@ -312,9 +328,9 @@ export const getAllEvents = async ({
           },
           ...typeId,
         },
-        distinct: ['hash'],
+        distinct: ["hash"],
         orderBy: {
-          startDateTime: 'asc',
+          startDateTime: "asc",
         },
       });
       break;
@@ -322,8 +338,19 @@ export const getAllEvents = async ({
       return;
   }
 
-  events.forEach((e) => Object.assign(e, { RSVP: e.RSVP[0]?.attendees.length }));
-  events.forEach((e) => delete Object.assign(e, { proposerName: e.proposer.firstName }).proposer);
+  events.forEach((e) =>
+    Object.assign(e, { RSVP: e.RSVP[0]?.attendees.length })
+  );
+  events.forEach(
+    (e) =>
+      delete Object.assign(e, { proposerName: e.proposer.firstName }).proposer
+  );
   // eslint-disable-next-line consistent-return
   return events;
 };
+
+export const updateEvent = async (id: number, data) =>
+  prisma.event.update({
+    where: { id },
+    data,
+  });
