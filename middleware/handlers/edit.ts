@@ -19,9 +19,9 @@ import {
   hashSha256,
 } from "@app/utils";
 
-const ONE_HOUR = 60 * 60 * 1000;
+const TIMEOUT = Config.magic.timeoutMinutes * 60 * 1000;
 const secret = process.env["MAGIC_SECRET"];
-const isExpired = (ts) => Date.now() - ts > ONE_HOUR;
+const isExpired = (ts) => Date.now() - ts > TIMEOUT;
 const magicHashMatch = (magicHash, eventHash, ts, secret) =>
   hashSha256(magicMessage(eventHash, ts, secret)) === magicHash;
 
@@ -52,27 +52,35 @@ export const editEventHandler = async (
     const e = events[i];
     const eventModel = getEventDetailsToStore(e, hash);
     delete eventModel.proposerName;
+    eventId = e.id;
+
+    const existingHash = await db.getEventHash(eventId);
+    if (existingHash !== hash) {
+      return next(errorBuilder("hash mismatch", 403, JSON.stringify(e)));
+    }
+
     try {
-      eventId = await db.getEventIdByHash(hash);
       const updatedEvent = await db.updateEvent(eventId, eventModel);
     } catch (e) {
-      console.debug("error updating db");
+      console.debug("error updating db", e);
       return next(errorBuilder("error updating db", 500, JSON.stringify(e)));
     }
 
     try {
       const calendarEvent = await db.getGCalEvent(eventId);
+      console.debug(calendarEvent);
       const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(
         eventModel,
         i + 1,
         events.length
       );
       const calEventId: string = await google.updateEvent(
-        eventGcalModel,
-        Config.services.google.calendars[e.gcalCalendar!]
+        calendarEvent.calendar,
+        calendarEvent.event,
+        eventGcalModel
       );
     } catch (e) {
-      console.debug("error updating gcal");
+      console.debug("error updating gcal", e);
       return next(errorBuilder("error updating gcal", 500, JSON.stringify(e)));
     }
   }

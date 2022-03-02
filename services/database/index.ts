@@ -133,6 +133,13 @@ export const getEventIdByHash = async (hash: string): Promise<number> => {
   return event!.id;
 };
 
+export const getEventHash = async (id: number): Promise<string> => {
+  const event = await prisma.event.findFirst({
+    where: { id },
+  });
+  return event!.hash;
+};
+
 export const eventExistsInRsvp = async (id: number): Promise<boolean> => {
   const exists = await prisma.rSVP.findFirst({
     where: { eventId: id },

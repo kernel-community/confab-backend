@@ -39,10 +39,11 @@ const getEvent = async (calendarId: string, eventId: string) => {
   ).data;
 };
 
-const updateEvent = async (event: GoogleEvent, calendarId: string) => {
+const updateEvent = async (calendarId: string, eventId: string, event: GoogleEvent) => {
   const calendar = await getCalendar();
   const e = await calendar.events.update({
     calendarId,
+    eventId,
     requestBody: event,
   });
   if (!e.data.id) {
