@@ -53,6 +53,7 @@ export const editEventHandler = async (
     try {
       updatedEvent = await db.updateEvent(eventId, e);
     } catch (e) {
+      console.debug("error updating db", e);
       return next(errorBuilder("error updating db", 500, JSON.stringify(e)));
     }
 
@@ -70,6 +71,7 @@ export const editEventHandler = async (
         eventGcalModel
       );
     } catch (e) {
+      console.debug("error updating gcal", e);
       return next(errorBuilder("error updating gcal", 500, JSON.stringify(e)));
     }
   }
