@@ -1,20 +1,15 @@
 import { NextFunction as Next, Response } from "express";
-import { nanoid } from "nanoid";
 import {
   RequestWithPayload,
   Event,
   GoogleEvent,
-  SlackEventMessage,
 } from "@app/types";
 import * as Config from "@app/config/index.json";
 import * as db from "@app/services/database";
 import google from "@app/services/google";
-import slack from "@app/services/slack";
 import {
-  getEventDetailsToStore,
   errorBuilder,
   getEventDetailsForGcal,
-  prepareSlackMessage,
   magicMessage,
   hashSha256,
 } from "@app/utils";
@@ -30,16 +25,15 @@ export const editEventHandler = async (
   res: Response,
   next: Next
 ) => {
-  const ts: string = req.query.ts as string;
-  const magic: string = req.query.magic as string;
+  const ts: string = req.body.ts as string;
+  const magic: string = req.body.magic as string;
   const { hash } = req.params;
-  const events: Event[] = req.body.data;
-
+  const events: Event[] = JSON.parse(req.body.data);
+  console.log({ts, magic, hash, events});
   if (isExpired(parseInt(ts))) {
     console.debug("link expired");
     return next(errorBuilder("link expired", 403, `${hash}, ${magic}, ${ts}`));
   }
-
   if (!magicHashMatch(magic, hash, ts, secret)) {
     console.debug("hash mismatch");
     return next(
@@ -50,19 +44,15 @@ export const editEventHandler = async (
   let eventId;
   for (let i = 0; i < events.length; i++) {
     const e = events[i];
-    const eventModel = getEventDetailsToStore(e, hash);
-    delete eventModel.proposerName;
     eventId = e.id;
-
     const existingHash = await db.getEventHash(eventId);
     if (existingHash !== hash) {
       return next(errorBuilder("hash mismatch", 403, JSON.stringify(e)));
     }
-
+    let updatedEvent;
     try {
-      const updatedEvent = await db.updateEvent(eventId, eventModel);
+      updatedEvent = await db.updateEvent(eventId, e);
     } catch (e) {
-      console.debug("error updating db", e);
       return next(errorBuilder("error updating db", 500, JSON.stringify(e)));
     }
 
@@ -70,7 +60,7 @@ export const editEventHandler = async (
       const calendarEvent = await db.getGCalEvent(eventId);
       console.debug(calendarEvent);
       const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(
-        eventModel,
+        updatedEvent,
         i + 1,
         events.length
       );
@@ -80,7 +70,6 @@ export const editEventHandler = async (
         eventGcalModel
       );
     } catch (e) {
-      console.debug("error updating gcal", e);
       return next(errorBuilder("error updating gcal", 500, JSON.stringify(e)));
     }
   }

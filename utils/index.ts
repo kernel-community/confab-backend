@@ -45,7 +45,6 @@ export const getEventDetailsForGcal = async (
     organizer: true,
     responseStatus: "accepted",
   };
-  const typeString = (await db.getType(Number(event.typeId!)))?.type;
   return {
     summary: `${event.title}${
       totalEvents > 1 ? ` (${eventNumber} of ${totalEvents})` : ""
