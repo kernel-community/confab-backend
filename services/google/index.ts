@@ -39,12 +39,14 @@ const getEvent = async (calendarId: string, eventId: string) => {
   ).data;
 };
 
-const updateEvent = async (calendarId: string, eventId: string, event: GoogleEvent) => {
+const updateEvent = async (calendarId: string, eventId: string, toUpdate: GoogleEvent) => {
   const calendar = await getCalendar();
+  const {attendees} = await getEvent(calendarId, eventId);
+  const withAttendees = Object.assign(toUpdate, {attendees: attendees});
   const e = await calendar.events.update({
     calendarId,
     eventId,
-    requestBody: event,
+    requestBody: withAttendees,
   });
   if (!e.data.id) {
     throw new Error("Error in updating event");
