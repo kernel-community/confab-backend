@@ -29,7 +29,6 @@ export const editEventHandler = async (
   const magic: string = req.body.magic as string;
   const { hash } = req.params;
   const events: Event[] = JSON.parse(req.body.data);
-  console.log({ts, magic, hash, events});
   if (isExpired(parseInt(ts))) {
     console.debug("link expired");
     return next(errorBuilder("link expired", 403, `${hash}, ${magic}, ${ts}`));
@@ -40,40 +39,20 @@ export const editEventHandler = async (
       errorBuilder("wrong magic hash", 403, `${hash}, ${magic}, ${ts}`)
     );
   }
-
   let eventId;
-  for (let i = 0; i < events.length; i++) {
-    const e = events[i];
-    eventId = e.id;
-    const existingHash = await db.getEventHash(eventId);
+  const existingHashes = await Promise.all(events.map((e) => db.getEventHash(e.id)));
+  existingHashes.forEach((existingHash) => {
     if (existingHash !== hash) {
-      return next(errorBuilder("hash mismatch", 403, JSON.stringify(e)));
+      return next(errorBuilder("hash mismatch", 403, JSON.stringify({existingHash, hash})));
     }
-    let updatedEvent;
-    try {
-      updatedEvent = await db.updateEvent(eventId, e);
-    } catch (e) {
-      console.debug("error updating db", e);
-      return next(errorBuilder("error updating db", 500, JSON.stringify(e)));
-    }
-
-    try {
-      const calendarEvent = await db.getGCalEvent(eventId);
-      console.debug(calendarEvent);
-      const eventGcalModel: GoogleEvent = await getEventDetailsForGcal(
-        updatedEvent,
-        i + 1,
-        events.length
-      );
-      const calEventId: string = await google.updateEvent(
-        calendarEvent.calendar,
-        calendarEvent.event,
-        eventGcalModel
-      );
-    } catch (e) {
-      console.debug("error updating gcal", e);
-      return next(errorBuilder("error updating gcal", 500, JSON.stringify(e)));
-    }
+  });
+  try {
+    const updatedEvents = await Promise.all(events.map((e) => db.updateEvent(e.id, e)));
+    const gcalEvents = await Promise.all(events.map((e) => db.getGCalEvent(e.id)));
+    const gCalToUpdate = await Promise.all((events.map((e, k) => getEventDetailsForGcal(updatedEvents[k], k+1, events.length))))
+    await Promise.all(events.map((_, k) => google.updateEvent(gcalEvents[k].calendar, gcalEvents[k].event, gCalToUpdate[k])));
+  } catch(err) {
+    return next(err);
   }
   req.intermediatePayload = {
     id: eventId,
