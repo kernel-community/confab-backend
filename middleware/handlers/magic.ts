@@ -33,11 +33,11 @@ export const magicLinkHandler = async (
       message
     )}&ts=${ts}`;
     const body = `${text} ${url}`;
-    const email = generateEmail(to, subject, body);
+    const email = generateEmail(to, subject + ` ${event.title}`, body);
     await google.send(email);
     req.intermediatePayload = { email: email };
     next();
   } catch (e) {
-    next(errorBuilder("error sending magic link", 500, JSON.stringify(e)));
+    next(e);
   }
 };
