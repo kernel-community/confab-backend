@@ -9,6 +9,7 @@ import {
   magicMessage,
   hashSha256,
 } from "@app/utils";
+import convoUrl from "@app/utils/convoUrl";
 
 const domain = Config.magic.email.domain;
 const subject = Config.magic.email.subject;
@@ -29,7 +30,7 @@ export const magicLinkHandler = async (
 
     const ts = Date.now();
     const message = magicMessage(eventHash, ts, secret);
-    const url = `https://${domain}/edit/${eventHash}?magic=${hashSha256(
+    const url = `${convoUrl}/edit/${eventHash}?magic=${hashSha256(
       message
     )}&ts=${ts}`;
     const body = `${text} ${url}`;
