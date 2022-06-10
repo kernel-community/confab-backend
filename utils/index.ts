@@ -56,7 +56,7 @@ export const getEventDetailsForGcal = async (
     end: {
       dateTime: event.endDateTime,
     },
-    guestsCanSeeOtherGuests: true,
+    guestsCanSeeOtherGuests: false,
     guestsCanInviteOthers: true, // @note default = true; if required, can make this a param
     location: event.location,
     description:
