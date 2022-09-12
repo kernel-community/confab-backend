@@ -25,7 +25,7 @@ export const createEvent = async (
         connectOrCreate: {
           create: {
             email: e.proposerEmail,
-            firstName: e.proposerName,
+            username: e.proposerName,
           },
           where: {
             email: e.proposerEmail,
@@ -76,9 +76,9 @@ export const createSlackMessage = async (
 export const getUserName = async (email: string) => {
   const name = await prisma.user.findUnique({
     where: { email },
-    select: { firstName: true },
+    select: { username: true },
   });
-  return name?.firstName;
+  return name?.username;
 };
 
 export const getUser = (email: string) =>
@@ -105,25 +105,42 @@ export const getType = async (id: number) => {
 
 export const rsvp = async (
   eventId: number,
-  attendees: string[],
-): Promise<RSVP> => prisma.rSVP.upsert({
-  update: {
-    attendees,
-  },
-  where: {
-    eventId,
-  },
-  create: {
-    event: { connect: { id: eventId } },
-    attendees,
-  },
-});
+  attendeeName: string,
+  attendeeEmail: string
+) => {
+  await prisma.user.upsert({
+    update: {
+      email: attendeeEmail, username: attendeeName
+    },
+    create: {
+      email: attendeeEmail, username: attendeeName
+    },
+    where: {
+      email: attendeeEmail
+    }
+  })
+  return prisma.rSVP.upsert({
+    where: {
+      eventId_attendeeEmail: {
+        eventId, attendeeEmail
+      }
+    },
+    update: {},
+    create: {
+      event: { connect: { id: eventId } },
+      attendee: {
+        connect: { email: attendeeEmail }
+      }
+    }
+  })
+};
 
 export const getAttendees = async (eventId: number): Promise<string[]> => {
-  const rsvp = await prisma.rSVP.findFirst({
+  const rsvp = await prisma.rSVP.findMany({
     where: { eventId },
+    select: { attendeeEmail: true }
   });
-  return rsvp ? rsvp.attendees : [];
+  return rsvp.map((r) => r.attendeeEmail);
 };
 
 export const getEventIdByHash = async (hash: string): Promise<number> => {
@@ -171,7 +188,7 @@ export const getAllTypes = async (): Promise<EventType[]> => {
   return types;
 };
 
-export const getEventDetails = async (hash: string): Promise<EventSchema[]> => {
+export const getEventDetails = async (hash: string) => {
   const events = await prisma.event.findMany({
     where: { hash },
     include: {
@@ -182,7 +199,23 @@ export const getEventDetails = async (hash: string): Promise<EventSchema[]> => {
     orderBy: {
       startDateTime: "asc",
     },
-  });
+  })
+
+  for (let i =0; i < events.length; i ++) {
+    const event = events[i];
+    const rsvps = event['RSVP'];
+    let usernames: string[] = [];
+    for (let j = 0; j < rsvps.length; j ++) {
+      let user = await prisma.user.findUnique({
+        where: {
+          email: rsvps[j].attendeeEmail
+        },
+        select: {username: true}
+      })
+      usernames.push(user?.username!);
+    }
+    Object.assign(events[i], {RSVP: usernames})
+  }
   return events;
 };
 export const getAllEvents = async ({
@@ -344,15 +377,13 @@ export const getAllEvents = async ({
     default:
       return;
   }
-
-  events.forEach((e) =>
-    Object.assign(e, { RSVP: e.RSVP[0]?.attendees.length })
+  events.forEach((e) => {
+      delete Object.assign(e, {
+        RSVP: e.RSVP.length,
+        proposerName: e.proposer.username
+      }).proposer
+    }
   );
-  events.forEach(
-    (e) =>
-      delete Object.assign(e, { proposerName: e.proposer.firstName }).proposer
-  );
-  // eslint-disable-next-line consistent-return
   return events;
 };
 

@@ -11,8 +11,8 @@ generator client {
 }
 
 model Event {
-  id              Int              @unique @default(autoincrement())
-  createdAt       DateTime         @default(now())
+  id              Int       @id @unique @default(autoincrement())
+  createdAt       DateTime  @default(now())
   title           String
   descriptionText String?
   descriptionHtml String?
@@ -23,21 +23,23 @@ model Event {
   series          Boolean
   limit           Int
   typeId          Int
-  type            EventType        @relation(fields: [typeId], references: [id])
+  type            EventType @relation(fields: [typeId], references: [id])
   proposerEmail   String
   Notes           String[]
-  proposer        User             @relation(fields: [proposerEmail], references: [email], onDelete: Cascade)
-  RSVP            RSVP[]
-  GoogleCalendar  GoogleCalendar[]
-  Slack           Slack[]
+
+  proposer User @relation(fields: [proposerEmail], references: [email], onDelete: Cascade)
+
+  RSVP           RSVP[]
+  GoogleCalendar GoogleCalendar[]
+  Slack          Slack[]
 }
 
 model User {
-  email         String   @unique
-  username      String?
-  firstName     String?
-  lastName      String?
-  Event         Event[]
+  email    String  @id @unique
+  username String?
+  firstName     String? // deprecate
+  Event Event[]
+  RSVP  RSVP[]
 }
 
 model EventType {
@@ -48,9 +50,15 @@ model EventType {
 }
 
 model RSVP {
-  eventId   Int      @unique
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  attendees String[]
+  id            String @id @default(uuid())
+  eventId       Int
+  event         Event  @relation(fields: [eventId], references: [id])
+  attendeeEmail String
+  attendee      User   @relation(fields: [attendeeEmail], references: [email])
+
+  attendees String[] // deprecate
+
+  @@unique([eventId, attendeeEmail])
 }
 
 model GoogleCalendar {

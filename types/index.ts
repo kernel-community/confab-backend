@@ -70,8 +70,8 @@ export type GoogleEvent = {
 };
 
 export type Attendee = {
-  name?: string
+  name: string
   email: string
-  eventId: number[]
+  events: number[]
   hash?: string
 };

@@ -11,27 +11,27 @@ export default async function rsvpHandler(
   next: Next,
 ) {
   const attendee: Attendee = req.body.data;
-  const { eventId } = attendee;
-  if (eventId.length < 1) {
+  const { events } = attendee;
+  if (events.length < 1) {
     next(
       errorBuilder(
         'eventid array required',
         500,
-        JSON.stringify(eventId),
+        JSON.stringify(events),
       ),
     );
     return;
   }
-  const attendees = await Promise.all(eventId.map((i) => db.getAttendees(i)));
-  await Promise.all(eventId.map((i, k) => {
-    if (attendees[k].find((a) => a === attendee.email.toLowerCase())) return;
+  await Promise.all(events.map((i) => {
     return db.rsvp(
       i,
-      [...attendees[k], attendee.email.toLowerCase()],
+      attendee.name,
+      attendee.email.toLowerCase(),
     );
   }));
-  const g = await Promise.all(eventId.map((i) => db.eventExistsInGCal(i)));
-  const gevents = await Promise.all(eventId.map((i, k) => (g[k] ? db.getGCalEvent(i) : null)));
+  // google event rsvp
+  const g = await Promise.all(events.map((event) => db.eventExistsInGCal(event)));
+  const gevents = await Promise.all(events.map((i, k) => (g[k] ? db.getGCalEvent(i) : null)));
   await Promise.all(
     gevents.map((e) => {
       if (!e) return;
