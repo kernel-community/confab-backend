@@ -108,17 +108,22 @@ export const rsvp = async (
   attendeeName: string,
   attendeeEmail: string
 ) => {
-  await prisma.user.upsert({
-    update: {
-      email: attendeeEmail, username: attendeeName
-    },
-    create: {
-      email: attendeeEmail, username: attendeeName
-    },
+  const user = await prisma.user.findUnique({
     where: {
       email: attendeeEmail
     }
   })
+  if (user) {
+    console.log("user found:", user);
+  }
+  if (!user) {
+    console.log("user not found, creating:", attendeeEmail);
+    await prisma.user.create({
+      data: {
+        email: attendeeEmail, username: attendeeName
+      }
+    })
+  }
   return prisma.rSVP.upsert({
     where: {
       eventId_attendeeEmail: {
