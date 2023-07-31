@@ -40,7 +40,13 @@ export default (client) => {
   router.get("/magic/:hash", magicLinkHandler, responseHandler);
 
   router.get("/getAllEvents", async( req,res) => {
-    const data = await prisma.event.findMany();
+    const data = await prisma.event.findMany({
+      include: {
+        proposer: true,
+        RSVP: true,
+        GoogleCalendar: true
+      }
+    });
     res.json({
       ok: true,
       data,
