@@ -13,6 +13,7 @@ import {
   magicLinkHandler,
   editEventHandler,
 } from "../middleware";
+import { prisma } from "@app/services/database";
 
 const router = Router();
 
@@ -37,6 +38,14 @@ export default (client) => {
   router.post("/edit/:hash", editEventHandler, responseHandler);
   // create magic link to edit event with hash
   router.get("/magic/:hash", magicLinkHandler, responseHandler);
+
+  router.get("/getAllEvents", async( req,res) => {
+    const data = prisma.event.findMany();
+    res.json({
+      ok: true,
+      data,
+    });
+  })
 
   /**
    * router.post('/event/archive', archiveEventHandler, responseHandler);
