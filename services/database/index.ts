@@ -267,6 +267,7 @@ export const getAllEvents = async ({
       type: true,
       proposer: true,
       RSVP: true,
+      GoogleCalendar: true
     },
     cursor: cursorObj,
   };
@@ -385,6 +386,7 @@ export const getAllEvents = async ({
   events.forEach((e) => {
       delete Object.assign(e, {
         RSVP: e.RSVP.length,
+        allRsvpsTemp: e.RSVP,
         proposerName: e.proposer.username
       }).proposer
     }
