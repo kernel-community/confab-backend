@@ -45,6 +45,9 @@ export default (client) => {
         proposer: true,
         RSVP: true,
         GoogleCalendar: true
+      },
+      orderBy: {
+        id: "asc"
       }
     });
     res.json({
